@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-05-05T08:13:41.032093",
+  "count": 2,
+  "products": [
+    {
+      "item_name": "テスト商品A プロテイン 1kg チョコレート",
+      "price": 3490,
+      "item_url": "https://item.rakuten.co.jp/shop/item-a/",
+      "image_url": "https://thumbnail.image.rakuten.co.jp/img/item-a.jpg",
+      "image_urls": [
+        "https://thumbnail.image.rakuten.co.jp/img/item-a.jpg"
+      ],
+      "review_average": 4.52,
+      "review_count": 1248,
+      "shop_name": "テストショップA",
+      "caption": "タンパク質21g配合。内容量1kg",
+      "point_rate": 2,
+      "fetched_at": "2026-05-05T08:13:41.028743"
+    },
+    {
+      "item_name": "テスト商品B コーヒーメーカー 全自動",
+      "price": 59800,
+      "item_url": "https://item.rakuten.co.jp/shop/item-b/",
+      "image_url": "https://thumbnail.image.rakuten.co.jp/img/item-b.jpg",
+      "image_urls": [
+        "https://thumbnail.image.rakuten.co.jp/img/item-b.jpg"
+      ],
+      "review_average": 4.31,
+      "review_count": 567,
+      "shop_name": "テストショップB",
+      "caption": "コンパクト設計。重量3.8kg",
+      "point_rate": 1,
+      "fetched_at": "2026-05-05T08:13:41.028743"
+    }
+  ]
+}

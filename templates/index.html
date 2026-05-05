@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ meta_title }}</title>
+  <meta name="description" content="{{ meta_description }}">
+  <meta name="robots" content="index, follow">
+
+  <!-- OGP -->
+  <meta property="og:title"       content="{{ meta_title }}">
+  <meta property="og:description" content="{{ meta_description }}">
+  <meta property="og:type"        content="website">
+
+  <!-- 構造化データ -->
+  <script type="application/ld+json">{{ structured_data | safe }}</script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rakuten: { DEFAULT: '#e60012', dark: '#b5000e', light: '#ff4455' },
+            accent:  { DEFAULT: '#ff6b35' },
+          },
+          fontFamily: {
+            sans: [
+              'Hiragino Kaku Gothic ProN','Hiragino Sans',
+              'Meiryo','sans-serif'
+            ],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* スムーズスクロール */
+    html { scroll-behavior: smooth; }
+    /* カードホバーエフェクト */
+    .product-card { transition: transform .2s, box-shadow .2s; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.12); }
+    /* 星評価 */
+    .star-fill  { color: #f5a623; }
+    .star-empty { color: #d1d5db; }
+    /* フィルタボタン アクティブ状態 */
+    .filter-btn.active {
+      background-color: #e60012;
+      color: #fff;
+      border-color: #e60012;
+    }
+    /* スケルトン（ロード前のプレースホルダー非表示） */
+    [data-hidden] { display: none !important; }
+    /* アニメーション */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    .fade-in { animation: fadeIn .3s ease both; }
+  </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+
+  <!-- ══ ヘッダー ══════════════════════════════════════════════ -->
+  <header class="bg-rakuten sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <a href="index.html" class="text-white font-bold text-xl tracking-tight shrink-0">
+        {{ site_name }}
+      </a>
+      <!-- PC 検索バー -->
+      <div class="hidden sm:flex flex-1 max-w-md">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="商品名で絞り込む..."
+          class="w-full px-4 py-2 rounded-l-full text-sm border-0 focus:outline-none focus:ring-2 focus:ring-white/50"
+          aria-label="商品検索"
+        >
+        <button
+          class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-r-full text-sm transition"
+          aria-label="検索実行"
+        >🔍</button>
+      </div>
+      <nav class="flex gap-4 text-sm text-white/90">
+        <a href="index.html"              class="hover:text-white">トップ</a>
+        <a href="categories/index.html"   class="hover:text-white">カテゴリ</a>
+      </nav>
+    </div>
+    <!-- モバイル検索バー -->
+    <div class="sm:hidden px-4 pb-3">
+      <input
+        id="searchInputMobile"
+        type="search"
+        placeholder="商品名で絞り込む..."
+        class="w-full px-4 py-2 rounded-full text-sm border-0 focus:outline-none"
+        aria-label="商品検索（モバイル）"
+      >
+    </div>
+  </header>
+
+  <!-- ══ ヒーロー ══════════════════════════════════════════════ -->
+  <section class="bg-gradient-to-br from-rakuten to-accent text-white py-10 px-4">
+    <div class="max-w-6xl mx-auto text-center">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">{{ site_headline }}</h1>
+      <p class="text-white/85 text-sm sm:text-base">{{ site_subheadline }}</p>
+      <div class="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+        <span class="bg-white/20 rounded-full px-3 py-1">
+          📦 掲載商品 <strong>{{ total_products }}</strong> 件
+        </span>
+        <span class="bg-white/20 rounded-full px-3 py-1">
+          🔄 最終更新 <strong>{{ last_updated }}</strong>
+        </span>
+        <span class="bg-white/20 rounded-full px-3 py-1">
+          ⭐ 平均評価 <strong>{{ avg_rating }}</strong> 点
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ フィルターバー ════════════════════════════════════════ -->
+  <div class="bg-white border-b border-gray-200 sticky top-[60px] z-40 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 space-y-2">
+
+      <!-- カテゴリフィルタ -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <span class="text-xs font-bold text-gray-500 shrink-0">カテゴリ</span>
+        <button
+          class="filter-btn active shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 transition"
+          data-filter-type="category"
+          data-filter-value="all"
+        >すべて</button>
+        {% for cat in categories %}
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition"
+          data-filter-type="category"
+          data-filter-value="{{ cat.key }}"
+        >{{ cat.label }} <span class="text-gray-400">({{ cat.count }})</span></button>
+        {% endfor %}
+      </div>
+
+      <!-- 価格帯フィルタ + ソート -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-gray-500 shrink-0">価格帯</span>
+        {% for pr in price_ranges %}
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition {% if loop.first %}active{% endif %}"
+          data-filter-type="price"
+          data-filter-value="{{ pr.key }}"
+          data-min="{{ pr.min }}"
+          data-max="{{ pr.max }}"
+        >{{ pr.label }}</button>
+        {% endfor %}
+
+        <!-- ソート -->
+        <div class="ml-auto flex items-center gap-2">
+          <span class="text-xs font-bold text-gray-500">並び順</span>
+          <select
+            id="sortSelect"
+            class="text-xs border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-rakuten"
+            aria-label="並び替え"
+          >
+            <option value="newest">新着順</option>
+            <option value="review_avg">評価が高い順</option>
+            <option value="review_count">レビュー数が多い順</option>
+            <option value="price_asc">価格が安い順</option>
+            <option value="price_desc">価格が高い順</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ メインコンテンツ ══════════════════════════════════════ -->
+  <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+
+    <!-- 件数表示 -->
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-sm text-gray-500">
+        <span id="visibleCount">{{ total_products }}</span> 件の商品を表示中
+      </p>
+      <!-- モバイル用フィルタリセット -->
+      <button
+        id="resetFilters"
+        class="text-xs text-rakuten underline hover:no-underline"
+      >フィルタをリセット</button>
+    </div>
+
+    <!-- 商品グリッド -->
+    <div
+      id="productGrid"
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+      role="list"
+      aria-label="商品一覧"
+    >
+      {% for product in products %}
+      <article
+        class="product-card bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
+        role="listitem"
+        data-name="{{ product.item_name | lower }}"
+        data-price="{{ product.price }}"
+        data-category="{{ product.category_key }}"
+        data-review-avg="{{ product.review_average }}"
+        data-review-count="{{ product.review_count }}"
+        data-date="{{ product.fetched_at }}"
+      >
+        <!-- 商品画像 -->
+        <a
+          href="{{ product.article_url }}"
+          class="block overflow-hidden bg-gray-100 aspect-square"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <img
+            src="{{ product.image_url }}"
+            alt="{{ product.item_name }}の商品画像"
+            class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            width="300"
+            height="300"
+            onerror="this.src='static/images/placeholder.png'; this.onerror=null;"
+          >
+        </a>
+
+        <!-- カード本文 -->
+        <div class="p-3 flex flex-col flex-1">
+          <!-- カテゴリバッジ -->
+          <span class="text-[10px] font-bold text-rakuten bg-red-50 rounded-full px-2 py-0.5 self-start mb-1">
+            {{ product.category_label }}
+          </span>
+
+          <!-- 商品名 -->
+          <a
+            href="{{ product.article_url }}"
+            class="text-xs sm:text-sm font-semibold text-gray-800 leading-snug hover:text-rakuten transition-colors line-clamp-3 mb-2 flex-1"
+          >
+            {{ product.item_name }}
+          </a>
+
+          <!-- 評価 -->
+          <div class="flex items-center gap-1 mb-1">
+            <div class="flex" aria-label="評価 {{ product.review_average }} 点">
+              {% for i in range(5) %}
+                {% if i < product.review_average | int %}
+                  <span class="star-fill text-xs">★</span>
+                {% elif (product.review_average - i) >= 0.5 %}
+                  <span class="star-fill text-xs opacity-60">★</span>
+                {% else %}
+                  <span class="star-empty text-xs">★</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <span class="text-[11px] font-bold text-amber-500">{{ product.review_average }}</span>
+            <span class="text-[10px] text-gray-400">({{ product.review_count | format_number }})</span>
+          </div>
+
+          <!-- 価格 -->
+          <div class="flex items-baseline gap-1 mb-3">
+            <span class="text-rakuten font-extrabold text-base sm:text-lg">
+              ¥{{ product.price | format_price }}
+            </span>
+            <span class="text-[10px] text-gray-400">税込</span>
+            {% if product.point_rate and product.point_rate > 1 %}
+            <span class="ml-auto text-[10px] bg-amber-100 text-amber-700 font-bold rounded px-1">
+              {{ product.point_rate }}倍P
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- CTAボタン -->
+          <a
+            href="{{ product.article_url }}"
+            class="block text-center bg-rakuten hover:bg-rakuten-dark text-white text-xs font-bold py-2 rounded-full transition-colors"
+            aria-label="{{ product.item_name }}のレビュー記事を読む"
+          >
+            レビューを読む →
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- 0件時メッセージ -->
+    <div
+      id="noResults"
+      class="hidden text-center py-20 text-gray-400"
+      role="status"
+      aria-live="polite"
+    >
+      <p class="text-5xl mb-4">🔍</p>
+      <p class="text-lg font-bold mb-1">条件に合う商品が見つかりません</p>
+      <p class="text-sm">フィルタを変更してお試しください。</p>
+      <button
+        onclick="resetAllFilters()"
+        class="mt-4 px-6 py-2 bg-rakuten text-white text-sm rounded-full hover:bg-rakuten-dark transition"
+      >フィルタをリセット</button>
+    </div>
+
+  </main>
+
+  <!-- ══ フッター ══════════════════════════════════════════════ -->
+  <footer class="bg-gray-800 text-gray-400 text-xs text-center py-6 px-4">
+    <p class="mb-1 leading-relaxed">
+      当サイトは楽天アフィリエイトプログラムに参加しています。
+      商品リンクを経由してご購入いただいた場合、当サイトに報酬が発生することがあります。
+    </p>
+    <p class="text-gray-600">&copy; {{ year }} {{ site_name }}</p>
+  </footer>
+
+  <!-- ══ JavaScript（フィルタ・ソート・検索） ══════════════════ -->
+  <script>
+  (() => {
+    'use strict';
+
+    // ── 状態 ──────────────────────────────────────
+    const state = {
+      category:  'all',
+      priceMin:  0,
+      priceMax:  Infinity,
+      sortKey:   'newest',
+      keyword:   '',
+    };
+
+    // ── DOM キャッシュ ─────────────────────────────
+    const grid        = document.getElementById('productGrid');
+    const noResults   = document.getElementById('noResults');
+    const countEl     = document.getElementById('visibleCount');
+    const sortSelect  = document.getElementById('sortSelect');
+    const searchPc    = document.getElementById('searchInput');
+    const searchMb    = document.getElementById('searchInputMobile');
+    const resetBtn    = document.getElementById('resetFilters');
+
+    const allCards = () => [...grid.querySelectorAll('.product-card')];
+
+    // ── フィルタ適用 ──────────────────────────────
+    function applyFilters() {
+      const cards = allCards();
+      let visible = 0;
+
+      cards.forEach(card => {
+        const price    = parseInt(card.dataset.price,  10);
+        const category = card.dataset.category;
+        const name     = card.dataset.name;
+
+        const matchCat  = state.category === 'all' || category === state.category;
+        const matchPr   = price >= state.priceMin && price <= state.priceMax;
+        const matchKw   = state.keyword === '' || name.includes(state.keyword.toLowerCase());
+
+        if (matchCat && matchPr && matchKw) {
+          card.classList.remove('hidden');
+          card.classList.add('fade-in');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+          card.classList.remove('fade-in');
+        }
+      });
+
+      countEl.textContent = visible;
+      noResults.classList.toggle('hidden', visible > 0);
+      grid.classList.toggle('hidden',      visible === 0);
+
+      sortCards();
+    }
+
+    // ── ソート ────────────────────────────────────
+    function sortCards() {
+      const cards = allCards().filter(c => !c.classList.contains('hidden'));
+      const sortFn = {
+        newest:       (a, b) => b.dataset.date.localeCompare(a.dataset.date),
+        review_avg:   (a, b) => parseFloat(b.dataset.reviewAvg)   - parseFloat(a.dataset.reviewAvg),
+        review_count: (a, b) => parseInt(b.dataset.reviewCount,10) - parseInt(a.dataset.reviewCount,10),
+        price_asc:    (a, b) => parseInt(a.dataset.price,10)       - parseInt(b.dataset.price,10),
+        price_desc:   (a, b) => parseInt(b.dataset.price,10)       - parseInt(a.dataset.price,10),
+      }[state.sortKey] || (() => 0);
+
+      cards.sort(sortFn).forEach(card => grid.appendChild(card));
+    }
+
+    // ── フィルタボタン グループ制御 ───────────────
+    function bindFilterButtons() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type  = btn.dataset.filterType;
+          const value = btn.dataset.filterValue;
+
+          // 同グループのボタンを非アクティブに
+          document.querySelectorAll(`.filter-btn[data-filter-type="${type}"]`)
+            .forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          if (type === 'category') {
+            state.category = value;
+          } else if (type === 'price') {
+            state.priceMin = parseInt(btn.dataset.min, 10) || 0;
+            state.priceMax = btn.dataset.max === '' ? Infinity : parseInt(btn.dataset.max, 10);
+          }
+          applyFilters();
+        });
+      });
+    }
+
+    // ── ソートセレクト ────────────────────────────
+    function bindSort() {
+      sortSelect.addEventListener('change', () => {
+        state.sortKey = sortSelect.value;
+        sortCards();
+      });
+    }
+
+    // ── 検索インプット ─────────────────────────────
+    function bindSearch() {
+      const handler = (e) => {
+        state.keyword = e.target.value.trim();
+        // 両方の入力欄を同期
+        if (searchPc && e.target !== searchPc)   searchPc.value  = state.keyword;
+        if (searchMb && e.target !== searchMb)   searchMb.value  = state.keyword;
+        applyFilters();
+      };
+      searchPc?.addEventListener('input', handler);
+      searchMb?.addEventListener('input', handler);
+    }
+
+    // ── リセット ──────────────────────────────────
+    window.resetAllFilters = function() {
+      state.category = 'all';
+      state.priceMin = 0;
+      state.priceMax = Infinity;
+      state.keyword  = '';
+      state.sortKey  = 'newest';
+      if (searchPc) searchPc.value = '';
+      if (searchMb) searchMb.value = '';
+      sortSelect.value = 'newest';
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle(
+          'active',
+          btn.dataset.filterValue === 'all' ||
+          (btn.dataset.filterType === 'price' && btn.dataset.filterValue === 'all')
+        );
+      });
+      applyFilters();
+    };
+
+    resetBtn.addEventListener('click', resetAllFilters);
+
+    // ── 初期化 ────────────────────────────────────
+    bindFilterButtons();
+    bindSort();
+    bindSearch();
+    applyFilters(); // 初期ソート（新着順）を適用
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {# ── SEO メタ ─────────────────────────────── #}
+  <title>{{ meta_title }}</title>
+  <meta name="description" content="{{ meta_description }}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ canonical_url | default('') }}">
+
+  {# ── OGP ────────────────────────────────────── #}
+  <meta property="og:title"       content="{{ meta_title }}">
+  <meta property="og:description" content="{{ meta_description }}">
+  <meta property="og:type"        content="{{ og_type | default('website') }}">
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+
+  {# ── 構造化データ (Article) ─────────────────── #}
+  {% if structured_data %}
+  <script type="application/ld+json">{{ structured_data | safe }}</script>
+  {% endif %}
+
+  {# ── スタイルシート ───────────────────────────── #}
+  <link rel="stylesheet" href="{{ static_root | default('../static') }}/css/style.css">
+
+  {# ── 子テンプレート用スロット ────────────────── #}
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  {# ── ヘッダー ─────────────────────────────── #}
+  <header class="site-header">
+    <div class="container">
+      <a class="site-logo" href="{{ site_root | default('../') }}index.html">
+        {{ site_name | default('おすすめ商品レビュー') }}
+      </a>
+      <nav class="site-nav" aria-label="グローバルナビゲーション">
+        <a href="{{ site_root | default('../') }}index.html">トップ</a>
+        <a href="{{ site_root | default('../') }}categories/index.html">カテゴリ</a>
+      </nav>
+    </div>
+  </header>
+
+  {# ── パンくずリスト ─────────────────────────── #}
+  {% if breadcrumbs %}
+  <div class="breadcrumb-wrap">
+    <div class="container">
+      <ol class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+        {% for crumb in breadcrumbs %}
+        <li class="breadcrumb__item"
+            itemprop="itemListElement"
+            itemscope itemtype="https://schema.org/ListItem">
+          {% if not loop.last %}
+            <a itemprop="item" href="{{ crumb.url }}">
+              <span itemprop="name">{{ crumb.name }}</span>
+            </a>
+            <span class="breadcrumb__sep" aria-hidden="true">›</span>
+          {% else %}
+            <span itemprop="name" class="breadcrumb__current">{{ crumb.name }}</span>
+          {% endif %}
+          <meta itemprop="position" content="{{ loop.index }}">
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── メインコンテンツ ──────────────────────── #}
+  <main id="main-content" class="main-content">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  {# ── フッター ─────────────────────────────── #}
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-note">
+        当サイトは楽天アフィリエイトプログラムに参加しています。
+        商品リンクを経由してご購入いただいた場合、当サイトに報酬が発生することがあります。
+      </p>
+      <p class="footer-copy">
+        &copy; {{ now.year if now else '2024' }} {{ site_name | default('おすすめ商品レビュー') }}
+      </p>
+    </div>
+  </footer>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

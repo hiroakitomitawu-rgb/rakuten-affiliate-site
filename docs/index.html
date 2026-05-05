@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>楽天市場 おすすめ商品レビュー一覧 2件｜おすすめ商品レビュー</title>
+  <meta name="description" content="楽天市場の人気商品2件を徹底レビュー。価格・評価・使用感を正直にまとめました。平均評価4.4点の厳選商品のみ掲載。">
+  <meta name="robots" content="index, follow">
+
+  <!-- OGP -->
+  <meta property="og:title"       content="楽天市場 おすすめ商品レビュー一覧 2件｜おすすめ商品レビュー">
+  <meta property="og:description" content="楽天市場の人気商品2件を徹底レビュー。価格・評価・使用感を正直にまとめました。平均評価4.4点の厳選商品のみ掲載。">
+  <meta property="og:type"        content="website">
+
+  <!-- 構造化データ -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "おすすめ商品レビュー",
+      "description": "実際のレビューをもとに、本当におすすめできる商品だけを厳選してご紹介します",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "ItemList",
+      "name": "楽天市場の人気商品を徹底レビュー",
+      "numberOfItems": 2,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "マイプロテイン Impact ホエイプロテイン チョコレートブラウニー味 1kg",
+          "url": "articles/mp001.html",
+          "image": "https://thumbnail.image.rakuten.co.jp/@0_mall/myprotein/cabinet/img/impact_whey_choco.jpg"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "デロンギ コンパクト全自動コーヒーメーカー マグニフィカスタート ECAM22020B",
+          "url": "articles/ecam22020b.html",
+          "image": "https://thumbnail.image.rakuten.co.jp/@0_mall/delonghi/cabinet/img/ecam22020b_main.jpg"
+        }
+      ]
+    }
+  ]
+}</script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rakuten: { DEFAULT: '#e60012', dark: '#b5000e', light: '#ff4455' },
+            accent:  { DEFAULT: '#ff6b35' },
+          },
+          fontFamily: {
+            sans: [
+              'Hiragino Kaku Gothic ProN','Hiragino Sans',
+              'Meiryo','sans-serif'
+            ],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* スムーズスクロール */
+    html { scroll-behavior: smooth; }
+    /* カードホバーエフェクト */
+    .product-card { transition: transform .2s, box-shadow .2s; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.12); }
+    /* 星評価 */
+    .star-fill  { color: #f5a623; }
+    .star-empty { color: #d1d5db; }
+    /* フィルタボタン アクティブ状態 */
+    .filter-btn.active {
+      background-color: #e60012;
+      color: #fff;
+      border-color: #e60012;
+    }
+    /* スケルトン（ロード前のプレースホルダー非表示） */
+    [data-hidden] { display: none !important; }
+    /* アニメーション */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    .fade-in { animation: fadeIn .3s ease both; }
+  </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+
+  <!-- ══ ヘッダー ══════════════════════════════════════════════ -->
+  <header class="bg-rakuten sticky top-0 z-50 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <a href="index.html" class="text-white font-bold text-xl tracking-tight shrink-0">
+        おすすめ商品レビュー
+      </a>
+      <!-- PC 検索バー -->
+      <div class="hidden sm:flex flex-1 max-w-md">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="商品名で絞り込む..."
+          class="w-full px-4 py-2 rounded-l-full text-sm border-0 focus:outline-none focus:ring-2 focus:ring-white/50"
+          aria-label="商品検索"
+        >
+        <button
+          class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-r-full text-sm transition"
+          aria-label="検索実行"
+        >🔍</button>
+      </div>
+      <nav class="flex gap-4 text-sm text-white/90">
+        <a href="index.html"              class="hover:text-white">トップ</a>
+        <a href="categories/index.html"   class="hover:text-white">カテゴリ</a>
+      </nav>
+    </div>
+    <!-- モバイル検索バー -->
+    <div class="sm:hidden px-4 pb-3">
+      <input
+        id="searchInputMobile"
+        type="search"
+        placeholder="商品名で絞り込む..."
+        class="w-full px-4 py-2 rounded-full text-sm border-0 focus:outline-none"
+        aria-label="商品検索（モバイル）"
+      >
+    </div>
+  </header>
+
+  <!-- ══ ヒーロー ══════════════════════════════════════════════ -->
+  <section class="bg-gradient-to-br from-rakuten to-accent text-white py-10 px-4">
+    <div class="max-w-6xl mx-auto text-center">
+      <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">楽天市場の人気商品を徹底レビュー</h1>
+      <p class="text-white/85 text-sm sm:text-base">実際のレビューをもとに、本当におすすめできる商品だけを厳選してご紹介します</p>
+      <div class="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+        <span class="bg-white/20 rounded-full px-3 py-1">
+          📦 掲載商品 <strong>2</strong> 件
+        </span>
+        <span class="bg-white/20 rounded-full px-3 py-1">
+          🔄 最終更新 <strong>2024年01月01日</strong>
+        </span>
+        <span class="bg-white/20 rounded-full px-3 py-1">
+          ⭐ 平均評価 <strong>4.4</strong> 点
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ フィルターバー ════════════════════════════════════════ -->
+  <div class="bg-white border-b border-gray-200 sticky top-[60px] z-40 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 space-y-2">
+
+      <!-- カテゴリフィルタ -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <span class="text-xs font-bold text-gray-500 shrink-0">カテゴリ</span>
+        <button
+          class="filter-btn active shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 transition"
+          data-filter-type="category"
+          data-filter-value="all"
+        >すべて</button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition"
+          data-filter-type="category"
+          data-filter-value="health"
+        >健康・ダイエット <span class="text-gray-400">(1)</span></button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition"
+          data-filter-type="category"
+          data-filter-value="food"
+        >食品・グルメ <span class="text-gray-400">(1)</span></button>
+      </div>
+
+      <!-- 価格帯フィルタ + ソート -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-gray-500 shrink-0">価格帯</span>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition active"
+          data-filter-type="price"
+          data-filter-value="all"
+          data-min="0"
+          data-max=""
+        >すべて</button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition "
+          data-filter-type="price"
+          data-filter-value="u1000"
+          data-min="0"
+          data-max="1000"
+        >〜¥1,000</button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition "
+          data-filter-type="price"
+          data-filter-value="1k5k"
+          data-min="1000"
+          data-max="5000"
+        >¥1,000〜5,000</button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition "
+          data-filter-type="price"
+          data-filter-value="5k10k"
+          data-min="5000"
+          data-max="10000"
+        >¥5,000〜10,000</button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition "
+          data-filter-type="price"
+          data-filter-value="10k30k"
+          data-min="10000"
+          data-max="30000"
+        >¥10,000〜30,000</button>
+        <button
+          class="filter-btn shrink-0 px-3 py-1 text-xs rounded-full border border-gray-300 hover:border-rakuten hover:text-rakuten transition "
+          data-filter-type="price"
+          data-filter-value="o30k"
+          data-min="30000"
+          data-max=""
+        >¥30,000〜</button>
+
+        <!-- ソート -->
+        <div class="ml-auto flex items-center gap-2">
+          <span class="text-xs font-bold text-gray-500">並び順</span>
+          <select
+            id="sortSelect"
+            class="text-xs border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-rakuten"
+            aria-label="並び替え"
+          >
+            <option value="newest">新着順</option>
+            <option value="review_avg">評価が高い順</option>
+            <option value="review_count">レビュー数が多い順</option>
+            <option value="price_asc">価格が安い順</option>
+            <option value="price_desc">価格が高い順</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ メインコンテンツ ══════════════════════════════════════ -->
+  <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+
+    <!-- 件数表示 -->
+    <div class="flex items-center justify-between mb-5">
+      <p class="text-sm text-gray-500">
+        <span id="visibleCount">2</span> 件の商品を表示中
+      </p>
+      <!-- モバイル用フィルタリセット -->
+      <button
+        id="resetFilters"
+        class="text-xs text-rakuten underline hover:no-underline"
+      >フィルタをリセット</button>
+    </div>
+
+    <!-- 商品グリッド -->
+    <div
+      id="productGrid"
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+      role="list"
+      aria-label="商品一覧"
+    >
+      <article
+        class="product-card bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
+        role="listitem"
+        data-name="マイプロテイン impact ホエイプロテイン チョコレートブラウニー味 1kg"
+        data-price="3490"
+        data-category="health"
+        data-review-avg="4.31"
+        data-review-count="5621"
+        data-date="2024-01-01T12:00:02"
+      >
+        <!-- 商品画像 -->
+        <a
+          href="articles/mp001.html"
+          class="block overflow-hidden bg-gray-100 aspect-square"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <img
+            src="https://thumbnail.image.rakuten.co.jp/@0_mall/myprotein/cabinet/img/impact_whey_choco.jpg"
+            alt="マイプロテイン Impact ホエイプロテイン チョコレートブラウニー味 1kgの商品画像"
+            class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            width="300"
+            height="300"
+            onerror="this.src='static/images/placeholder.png'; this.onerror=null;"
+          >
+        </a>
+
+        <!-- カード本文 -->
+        <div class="p-3 flex flex-col flex-1">
+          <!-- カテゴリバッジ -->
+          <span class="text-[10px] font-bold text-rakuten bg-red-50 rounded-full px-2 py-0.5 self-start mb-1">
+            健康・ダイエット
+          </span>
+
+          <!-- 商品名 -->
+          <a
+            href="articles/mp001.html"
+            class="text-xs sm:text-sm font-semibold text-gray-800 leading-snug hover:text-rakuten transition-colors line-clamp-3 mb-2 flex-1"
+          >
+            マイプロテイン Impact ホエイプロテイン チョコレートブラウニー味 1kg
+          </a>
+
+          <!-- 評価 -->
+          <div class="flex items-center gap-1 mb-1">
+            <div class="flex" aria-label="評価 4.31 点">
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-empty text-xs">★</span>
+            </div>
+            <span class="text-[11px] font-bold text-amber-500">4.31</span>
+            <span class="text-[10px] text-gray-400">(5,621)</span>
+          </div>
+
+          <!-- 価格 -->
+          <div class="flex items-baseline gap-1 mb-3">
+            <span class="text-rakuten font-extrabold text-base sm:text-lg">
+              ¥3,490
+            </span>
+            <span class="text-[10px] text-gray-400">税込</span>
+            <span class="ml-auto text-[10px] bg-amber-100 text-amber-700 font-bold rounded px-1">
+              5倍P
+            </span>
+          </div>
+
+          <!-- CTAボタン -->
+          <a
+            href="articles/mp001.html"
+            class="block text-center bg-rakuten hover:bg-rakuten-dark text-white text-xs font-bold py-2 rounded-full transition-colors"
+            aria-label="マイプロテイン Impact ホエイプロテイン チョコレートブラウニー味 1kgのレビュー記事を読む"
+          >
+            レビューを読む →
+          </a>
+        </div>
+      </article>
+      <article
+        class="product-card bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
+        role="listitem"
+        data-name="デロンギ コンパクト全自動コーヒーメーカー マグニフィカスタート ecam22020b"
+        data-price="59800"
+        data-category="food"
+        data-review-avg="4.52"
+        data-review-count="1248"
+        data-date="2024-01-01T12:00:01"
+      >
+        <!-- 商品画像 -->
+        <a
+          href="articles/ecam22020b.html"
+          class="block overflow-hidden bg-gray-100 aspect-square"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <img
+            src="https://thumbnail.image.rakuten.co.jp/@0_mall/delonghi/cabinet/img/ecam22020b_main.jpg"
+            alt="デロンギ コンパクト全自動コーヒーメーカー マグニフィカスタート ECAM22020Bの商品画像"
+            class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            width="300"
+            height="300"
+            onerror="this.src='static/images/placeholder.png'; this.onerror=null;"
+          >
+        </a>
+
+        <!-- カード本文 -->
+        <div class="p-3 flex flex-col flex-1">
+          <!-- カテゴリバッジ -->
+          <span class="text-[10px] font-bold text-rakuten bg-red-50 rounded-full px-2 py-0.5 self-start mb-1">
+            食品・グルメ
+          </span>
+
+          <!-- 商品名 -->
+          <a
+            href="articles/ecam22020b.html"
+            class="text-xs sm:text-sm font-semibold text-gray-800 leading-snug hover:text-rakuten transition-colors line-clamp-3 mb-2 flex-1"
+          >
+            デロンギ コンパクト全自動コーヒーメーカー マグニフィカスタート ECAM22020B
+          </a>
+
+          <!-- 評価 -->
+          <div class="flex items-center gap-1 mb-1">
+            <div class="flex" aria-label="評価 4.52 点">
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs">★</span>
+                  <span class="star-fill text-xs opacity-60">★</span>
+            </div>
+            <span class="text-[11px] font-bold text-amber-500">4.52</span>
+            <span class="text-[10px] text-gray-400">(1,248)</span>
+          </div>
+
+          <!-- 価格 -->
+          <div class="flex items-baseline gap-1 mb-3">
+            <span class="text-rakuten font-extrabold text-base sm:text-lg">
+              ¥59,800
+            </span>
+            <span class="text-[10px] text-gray-400">税込</span>
+            <span class="ml-auto text-[10px] bg-amber-100 text-amber-700 font-bold rounded px-1">
+              2倍P
+            </span>
+          </div>
+
+          <!-- CTAボタン -->
+          <a
+            href="articles/ecam22020b.html"
+            class="block text-center bg-rakuten hover:bg-rakuten-dark text-white text-xs font-bold py-2 rounded-full transition-colors"
+            aria-label="デロンギ コンパクト全自動コーヒーメーカー マグニフィカスタート ECAM22020Bのレビュー記事を読む"
+          >
+            レビューを読む →
+          </a>
+        </div>
+      </article>
+    </div>
+
+    <!-- 0件時メッセージ -->
+    <div
+      id="noResults"
+      class="hidden text-center py-20 text-gray-400"
+      role="status"
+      aria-live="polite"
+    >
+      <p class="text-5xl mb-4">🔍</p>
+      <p class="text-lg font-bold mb-1">条件に合う商品が見つかりません</p>
+      <p class="text-sm">フィルタを変更してお試しください。</p>
+      <button
+        onclick="resetAllFilters()"
+        class="mt-4 px-6 py-2 bg-rakuten text-white text-sm rounded-full hover:bg-rakuten-dark transition"
+      >フィルタをリセット</button>
+    </div>
+
+  </main>
+
+  <!-- ══ フッター ══════════════════════════════════════════════ -->
+  <footer class="bg-gray-800 text-gray-400 text-xs text-center py-6 px-4">
+    <p class="mb-1 leading-relaxed">
+      当サイトは楽天アフィリエイトプログラムに参加しています。
+      商品リンクを経由してご購入いただいた場合、当サイトに報酬が発生することがあります。
+    </p>
+    <p class="text-gray-600">&copy; 2026 おすすめ商品レビュー</p>
+  </footer>
+
+  <!-- ══ JavaScript（フィルタ・ソート・検索） ══════════════════ -->
+  <script>
+  (() => {
+    'use strict';
+
+    // ── 状態 ──────────────────────────────────────
+    const state = {
+      category:  'all',
+      priceMin:  0,
+      priceMax:  Infinity,
+      sortKey:   'newest',
+      keyword:   '',
+    };
+
+    // ── DOM キャッシュ ─────────────────────────────
+    const grid        = document.getElementById('productGrid');
+    const noResults   = document.getElementById('noResults');
+    const countEl     = document.getElementById('visibleCount');
+    const sortSelect  = document.getElementById('sortSelect');
+    const searchPc    = document.getElementById('searchInput');
+    const searchMb    = document.getElementById('searchInputMobile');
+    const resetBtn    = document.getElementById('resetFilters');
+
+    const allCards = () => [...grid.querySelectorAll('.product-card')];
+
+    // ── フィルタ適用 ──────────────────────────────
+    function applyFilters() {
+      const cards = allCards();
+      let visible = 0;
+
+      cards.forEach(card => {
+        const price    = parseInt(card.dataset.price,  10);
+        const category = card.dataset.category;
+        const name     = card.dataset.name;
+
+        const matchCat  = state.category === 'all' || category === state.category;
+        const matchPr   = price >= state.priceMin && price <= state.priceMax;
+        const matchKw   = state.keyword === '' || name.includes(state.keyword.toLowerCase());
+
+        if (matchCat && matchPr && matchKw) {
+          card.classList.remove('hidden');
+          card.classList.add('fade-in');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+          card.classList.remove('fade-in');
+        }
+      });
+
+      countEl.textContent = visible;
+      noResults.classList.toggle('hidden', visible > 0);
+      grid.classList.toggle('hidden',      visible === 0);
+
+      sortCards();
+    }
+
+    // ── ソート ────────────────────────────────────
+    function sortCards() {
+      const cards = allCards().filter(c => !c.classList.contains('hidden'));
+      const sortFn = {
+        newest:       (a, b) => b.dataset.date.localeCompare(a.dataset.date),
+        review_avg:   (a, b) => parseFloat(b.dataset.reviewAvg)   - parseFloat(a.dataset.reviewAvg),
+        review_count: (a, b) => parseInt(b.dataset.reviewCount,10) - parseInt(a.dataset.reviewCount,10),
+        price_asc:    (a, b) => parseInt(a.dataset.price,10)       - parseInt(b.dataset.price,10),
+        price_desc:   (a, b) => parseInt(b.dataset.price,10)       - parseInt(a.dataset.price,10),
+      }[state.sortKey] || (() => 0);
+
+      cards.sort(sortFn).forEach(card => grid.appendChild(card));
+    }
+
+    // ── フィルタボタン グループ制御 ───────────────
+    function bindFilterButtons() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type  = btn.dataset.filterType;
+          const value = btn.dataset.filterValue;
+
+          // 同グループのボタンを非アクティブに
+          document.querySelectorAll(`.filter-btn[data-filter-type="${type}"]`)
+            .forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          if (type === 'category') {
+            state.category = value;
+          } else if (type === 'price') {
+            state.priceMin = parseInt(btn.dataset.min, 10) || 0;
+            state.priceMax = btn.dataset.max === '' ? Infinity : parseInt(btn.dataset.max, 10);
+          }
+          applyFilters();
+        });
+      });
+    }
+
+    // ── ソートセレクト ────────────────────────────
+    function bindSort() {
+      sortSelect.addEventListener('change', () => {
+        state.sortKey = sortSelect.value;
+        sortCards();
+      });
+    }
+
+    // ── 検索インプット ─────────────────────────────
+    function bindSearch() {
+      const handler = (e) => {
+        state.keyword = e.target.value.trim();
+        // 両方の入力欄を同期
+        if (searchPc && e.target !== searchPc)   searchPc.value  = state.keyword;
+        if (searchMb && e.target !== searchMb)   searchMb.value  = state.keyword;
+        applyFilters();
+      };
+      searchPc?.addEventListener('input', handler);
+      searchMb?.addEventListener('input', handler);
+    }
+
+    // ── リセット ──────────────────────────────────
+    window.resetAllFilters = function() {
+      state.category = 'all';
+      state.priceMin = 0;
+      state.priceMax = Infinity;
+      state.keyword  = '';
+      state.sortKey  = 'newest';
+      if (searchPc) searchPc.value = '';
+      if (searchMb) searchMb.value = '';
+      sortSelect.value = 'newest';
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle(
+          'active',
+          btn.dataset.filterValue === 'all' ||
+          (btn.dataset.filterType === 'price' && btn.dataset.filterValue === 'all')
+        );
+      });
+      applyFilters();
+    };
+
+    resetBtn.addEventListener('click', resetAllFilters);
+
+    // ── 初期化 ────────────────────────────────────
+    bindFilterButtons();
+    bindSort();
+    bindSearch();
+    applyFilters(); // 初期ソート（新着順）を適用
+  })();
+  </script>
+
+</body>
+</html>

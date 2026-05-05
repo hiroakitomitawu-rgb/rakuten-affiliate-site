@@ -1,0 +1,210 @@
+# ═══════════════════════════════════════════════════════════════════════
+# update.yml
+# 楽天アフィリエイトサイト 毎日自動更新ワークフロー
+#
+# 実行トリガー:
+#   - 毎日 09:00 JST (= 00:00 UTC) に自動実行
+#   - GitHub の Actions タブから手動実行も可能
+#
+# 必要な GitHub Secrets:
+#   RAKUTEN_APP_ID      楽天 Web サービス アプリID
+#   RAKUTEN_AFFILIATE_ID  楽天アフィリエイトID（省略可）
+#
+# 必要な GitHub の設定:
+#   Settings → Pages → Source を "GitHub Actions" に設定
+#   Settings → Actions → General → Workflow permissions を
+#   "Read and write permissions" に設定
+# ═══════════════════════════════════════════════════════════════════════
+
+name: 毎日更新 - 商品データ取得・記事生成・Pages デプロイ
+
+on:
+  # ── 定期実行: 毎日 00:00 UTC = 09:00 JST ─────────────────────────
+  schedule:
+    - cron: '0 0 * * *'
+
+  # ── 手動実行（Actions タブの "Run workflow" ボタン） ────────────────
+  workflow_dispatch:
+    inputs:
+      skip_fetch:
+        description: 'APIデータ取得をスキップ（既存 products.json を使用）'
+        type: boolean
+        default: false
+      log_level:
+        description: 'ログレベル'
+        type: choice
+        options: [INFO, DEBUG, WARNING]
+        default: INFO
+
+# ── 並行実行制御: 同一ワークフローは1つだけ実行 ─────────────────────
+concurrency:
+  group: update-site
+  cancel-in-progress: false
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 1: 商品データ取得・記事生成・コミット
+  # ═══════════════════════════════════════════════════════════════════
+  build:
+    name: Build - データ取得・HTML生成
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: write   # git push に必要
+
+    outputs:
+      has_changes: ${{ steps.check_changes.outputs.has_changes }}
+
+    steps:
+      # ── 1. ソースコードをチェックアウト ──────────────────────────
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # コミット履歴をすべて取得（git diff のため）
+
+      # ── 2. Python 環境セットアップ ────────────────────────────────
+      - name: Python 3.12 をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip          # requirements.txt が変わらない限りキャッシュ利用
+
+      - name: 依存パッケージをインストール
+        run: pip install -r requirements.txt
+
+      # ── 3. Step 1: 楽天APIから商品データを取得 ───────────────────
+      - name: 📦 Step 1 - 楽天APIから商品データを取得
+        if: ${{ github.event.inputs.skip_fetch != 'true' }}
+        env:
+          RAKUTEN_APPLICATION_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_AFFILIATE_ID:   ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+          LOG_LEVEL: ${{ github.event.inputs.log_level || 'INFO' }}
+        run: |
+          python fetch_products.py
+          echo "取得件数: $(python -c "import json; d=json.load(open('data/products.json')); print(d['count'])")"
+
+      - name: 📦 Step 1 - スキップ（既存データを使用）
+        if: ${{ github.event.inputs.skip_fetch == 'true' }}
+        run: echo "API取得をスキップしました。既存の data/products.json を使用します。"
+
+      # ── 4. Step 2: 個別記事 HTML を生成 ──────────────────────────
+      - name: 📝 Step 2 - 記事HTMLを生成
+        env:
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+          LOG_LEVEL: ${{ github.event.inputs.log_level || 'INFO' }}
+        run: |
+          python generate_articles.py \
+            --data data/products.json \
+            --output docs/articles \
+            --templates templates \
+            --articles-prefix articles/
+
+      # ── 5. Step 3: トップページ index.html を生成 ────────────────
+      - name: 🏠 Step 3 - トップページを生成
+        env:
+          LOG_LEVEL: ${{ github.event.inputs.log_level || 'INFO' }}
+        run: |
+          python generate_index.py \
+            --data data/products.json \
+            --output docs/index.html \
+            --articles-dir docs/articles \
+            --templates templates \
+            --articles-prefix articles/
+
+      # ── 6. 静的アセットを docs/ にコピー ─────────────────────────
+      - name: 📁 静的アセットを docs/ にコピー
+        run: |
+          mkdir -p docs/static
+          cp -r static/. docs/static/
+          echo "コピー完了:"
+          find docs/static -type f | head -20
+
+      # ── 7. 変更有無チェック ───────────────────────────────────────
+      - name: 🔍 変更有無を確認
+        id: check_changes
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "変更なし - コミット・デプロイをスキップします"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "変更あり - コミット・デプロイを実行します"
+            git diff --cached --stat
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 8. Step 4: コミット & プッシュ ───────────────────────────
+      - name: 🚀 Step 4 - 変更をコミット・プッシュ
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # コミットメッセージに日時と取得件数を含める
+          PRODUCT_COUNT=$(python -c "
+          import json, pathlib
+          p = pathlib.Path('data/products.json')
+          print(json.loads(p.read_text())['count'] if p.exists() else 0)
+          ")
+          TIMESTAMP=$(TZ='Asia/Tokyo' date '+%Y-%m-%d %H:%M JST')
+
+          git commit -m "🔄 自動更新: ${TIMESTAMP} (商品${PRODUCT_COUNT}件)"
+          git push origin HEAD
+
+      # ── 9. docs/ を GitHub Pages 用アーティファクトとしてアップロード
+      - name: 📤 Pages アーティファクトをアップロード
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 2: GitHub Pages へデプロイ（build ジョブ成功時のみ）
+  # ═══════════════════════════════════════════════════════════════════
+  deploy:
+    name: Deploy - GitHub Pages へ公開
+    needs: build
+    if: needs.build.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      pages:        write   # Pages デプロイに必要
+      id-token:     write   # OIDC トークン（Pages 認証）
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # ── Step 5: GitHub Pages にデプロイ ──────────────────────────
+      - name: 🌐 Step 5 - GitHub Pages にデプロイ
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: 🎉 デプロイ完了
+        run: |
+          echo "公開URL: ${{ steps.deployment.outputs.page_url }}"
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 3: 失敗通知（オプション）
+  # ═══════════════════════════════════════════════════════════════════
+  notify-failure:
+    name: 失敗通知
+    needs: [build, deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ❌ 失敗サマリーを出力
+        run: |
+          echo "## ❌ 自動更新ワークフローが失敗しました" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**日時**: $(TZ='Asia/Tokyo' date '+%Y-%m-%d %H:%M JST')" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 確認事項" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [ ] GitHub Secrets に \`RAKUTEN_APP_ID\` が正しく設定されているか" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [ ] 楽天 API のレート制限に引っかかっていないか" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [ ] \`requirements.txt\` のパッケージバージョンが正しいか" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [ ] \`Settings > Actions > Workflow permissions\` が Write 権限になっているか" >> "$GITHUB_STEP_SUMMARY"

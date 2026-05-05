@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+{# 記事ページ固有のスタイル追加なし (style.css に統合) #}
+{% endblock %}
+
+{% block content %}
+<article class="article" itemscope itemtype="https://schema.org/Article">
+
+  {# ══════════════════════════════════════════
+     § 1. タイトル（h1・60文字以内）
+     ══════════════════════════════════════════ #}
+  <header class="article-header">
+    <div class="article-header__meta">
+      <span class="article-header__category">{{ category_label }}</span>
+      <time class="article-header__date" datetime="{{ published_date }}">
+        {{ published_date_jp }}
+      </time>
+    </div>
+
+    <h1 class="article-header__title" itemprop="headline">
+      {{ article_title }}
+    </h1>
+
+    <p class="article-header__subtitle">{{ article_subtitle }}</p>
+
+    {# 評価サマリー（構造化データ対応） #}
+    {% if review_average > 0 %}
+    <div class="review-summary"
+         itemprop="aggregateRating"
+         itemscope itemtype="https://schema.org/AggregateRating">
+      <span class="review-summary__stars" aria-label="評価{{ review_average }}">
+        {% for i in range(5) %}
+          <span class="star {{ 'star--full' if i < review_average|int else ('star--half' if (review_average - i) >= 0.5 else 'star--empty') }}"
+                aria-hidden="true">★</span>
+        {% endfor %}
+      </span>
+      <span class="review-summary__score" itemprop="ratingValue">{{ review_average }}</span>
+      <span class="review-summary__count">
+        （<span itemprop="reviewCount">{{ review_count }}</span>件のレビュー）
+      </span>
+      <meta itemprop="bestRating" content="5">
+      <meta itemprop="worstRating" content="1">
+    </div>
+    {% endif %}
+  </header>
+
+  {# ══════════════════════════════════════════
+     § 2. アイキャッチ画像
+     ══════════════════════════════════════════ #}
+  <figure class="article-eyecatch">
+    <img
+      src="{{ image_url }}"
+      alt="{{ image_alt }}"
+      class="article-eyecatch__img"
+      width="600"
+      height="400"
+      loading="lazy"
+      itemprop="image"
+      onerror="this.src='{{ static_root | default('../static') }}/images/placeholder.png'"
+    >
+    <figcaption class="article-eyecatch__caption">
+      {{ item_name }}（税込 {{ price | format_price }}円）
+    </figcaption>
+  </figure>
+
+  {# ══════════════════════════════════════════
+     § 3. 導入文（読者の悩みに共感・200文字）
+     ══════════════════════════════════════════ #}
+  <section class="article-intro" aria-labelledby="sec-intro">
+    <h2 id="sec-intro" class="article-intro__heading visually-hidden">この記事について</h2>
+    <div class="article-intro__body" itemprop="description">
+      {% for para in intro_paragraphs %}
+      <p>{{ para }}</p>
+      {% endfor %}
+    </div>
+
+    {# 目次 #}
+    <nav class="toc" aria-label="目次">
+      <p class="toc__label">この記事でわかること</p>
+      <ol class="toc__list">
+        <li><a href="#sec-spec">{{ item_name }}のスペック・詳細</a></li>
+        <li><a href="#sec-points">おすすめポイント3選</a></li>
+        <li><a href="#sec-target">こんな方におすすめ</a></li>
+        <li><a href="#sec-cta">楽天市場で価格をチェック</a></li>
+        <li><a href="#sec-summary">まとめ</a></li>
+      </ol>
+    </nav>
+  </section>
+
+  {# ══════════════════════════════════════════
+     § 4. 商品スペック表
+     ══════════════════════════════════════════ #}
+  <section class="article-spec" aria-labelledby="sec-spec">
+    <h2 id="sec-spec" class="section-heading">
+      <span class="section-heading__icon" aria-hidden="true">📋</span>
+      {{ item_name }}の基本スペック
+    </h2>
+
+    <div class="spec-card">
+      <div class="spec-card__img-wrap">
+        <img
+          src="{{ image_url }}"
+          alt="{{ image_alt }}"
+          class="spec-card__img"
+          width="300"
+          height="300"
+          loading="lazy"
+        >
+      </div>
+      <div class="spec-card__detail">
+        <table class="spec-table" aria-label="{{ item_name }}のスペック一覧">
+          <tbody>
+            <tr>
+              <th scope="row">商品名</th>
+              <td>{{ item_name }}</td>
+            </tr>
+            <tr>
+              <th scope="row">価格（税込）</th>
+              <td class="spec-table__price">
+                <strong>{{ price | format_price }}</strong> 円
+                {% if point_rate > 1 %}
+                <span class="spec-table__point">{{ point_rate }}倍ポイント</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">販売ショップ</th>
+              <td>{{ shop_name }}</td>
+            </tr>
+            <tr>
+              <th scope="row">レビュー評価</th>
+              <td>
+                {{ review_average }} / 5.0
+                <small>（{{ review_count }}件）</small>
+              </td>
+            </tr>
+            {% for row in spec_extra_rows %}
+            <tr>
+              <th scope="row">{{ row.label }}</th>
+              <td>{{ row.value }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <a
+          href="{{ affiliate_url }}"
+          class="btn btn--primary btn--sm"
+          target="_blank"
+          rel="noopener nofollow sponsored"
+          aria-label="{{ item_name }}を楽天市場で確認する"
+        >
+          楽天市場で価格を確認する →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {# ══════════════════════════════════════════
+     § 5. おすすめポイント3つ
+     ══════════════════════════════════════════ #}
+  <section class="article-points" aria-labelledby="sec-points">
+    <h2 id="sec-points" class="section-heading">
+      <span class="section-heading__icon" aria-hidden="true">✅</span>
+      {{ item_name }}のおすすめポイント3選
+    </h2>
+
+    <ol class="point-list">
+      {% for point in recommend_points %}
+      <li class="point-list__item">
+        <div class="point-list__head">
+          <span class="point-list__num" aria-hidden="true">{{ loop.index }}</span>
+          <h3 class="point-list__title">{{ point.title }}</h3>
+        </div>
+        <p class="point-list__body">{{ point.body }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {# ══════════════════════════════════════════
+     § 6. こんな人におすすめ
+     ══════════════════════════════════════════ #}
+  <section class="article-target" aria-labelledby="sec-target">
+    <h2 id="sec-target" class="section-heading">
+      <span class="section-heading__icon" aria-hidden="true">🙋</span>
+      こんな方に特におすすめ
+    </h2>
+
+    <ul class="target-list">
+      {% for target in target_users %}
+      <li class="target-list__item">
+        <span class="target-list__check" aria-hidden="true">✓</span>
+        {{ target }}
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% if not_for_users %}
+    <div class="not-for">
+      <p class="not-for__heading">こんな方には向かないかも</p>
+      <ul class="not-for__list">
+        {% for nf in not_for_users %}
+        <li>{{ nf }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </section>
+
+  {# ══════════════════════════════════════════
+     § 7. CTAボタン（楽天アフィリエイトリンク）
+     ══════════════════════════════════════════ #}
+  <section class="article-cta" id="sec-cta" aria-labelledby="sec-cta-heading">
+    <h2 id="sec-cta-heading" class="visually-hidden">楽天市場で購入する</h2>
+
+    <div class="cta-box">
+      <p class="cta-box__lead">
+        <strong>{{ item_name }}</strong> は楽天市場でお得に購入できます。
+        レビュー<strong>{{ review_count }}件・評価{{ review_average }}</strong>の
+        人気商品です。
+      </p>
+
+      <div class="cta-box__price-wrap">
+        <span class="cta-box__price-label">現在の価格</span>
+        <span class="cta-box__price">{{ price | format_price }}<small>円（税込）</small></span>
+      </div>
+
+      <a
+        href="{{ affiliate_url }}"
+        class="btn btn--rakuten btn--lg"
+        target="_blank"
+        rel="noopener nofollow sponsored"
+        aria-label="{{ item_name }}を楽天市場で購入する（外部リンク）"
+      >
+        <span class="btn__icon" aria-hidden="true">🛒</span>
+        楽天市場で購入する
+      </a>
+
+      <p class="cta-box__note">
+        ※ 商品価格・在庫状況はリンク先でご確認ください。
+        当サイトはアフィリエイトプログラムを利用しています。
+      </p>
+    </div>
+  </section>
+
+  {# ══════════════════════════════════════════
+     § 8. まとめ（100文字）
+     ══════════════════════════════════════════ #}
+  <section class="article-summary" aria-labelledby="sec-summary">
+    <h2 id="sec-summary" class="section-heading">
+      <span class="section-heading__icon" aria-hidden="true">📝</span>
+      まとめ
+    </h2>
+
+    <div class="summary-box">
+      <p>{{ summary_text }}</p>
+    </div>
+
+    {# 再掲CTA #}
+    <div class="summary-cta">
+      <a
+        href="{{ affiliate_url }}"
+        class="btn btn--rakuten btn--md"
+        target="_blank"
+        rel="noopener nofollow sponsored"
+      >
+        <span class="btn__icon" aria-hidden="true">🛒</span>
+        楽天市場で {{ item_name }} を見る
+      </a>
+    </div>
+  </section>
+
+  {# ── 関連記事（任意） ─────────────────────────── #}
+  {% if related_articles %}
+  <section class="related-articles" aria-labelledby="related-heading">
+    <h2 id="related-heading" class="section-heading">関連記事</h2>
+    <ul class="related-articles__list">
+      {% for rel in related_articles %}
+      <li class="related-articles__item">
+        <a href="{{ rel.url }}" class="related-articles__link">
+          {% if rel.image_url %}
+          <img src="{{ rel.image_url }}" alt="{{ rel.title }}" loading="lazy" width="80" height="80">
+          {% endif %}
+          <span>{{ rel.title }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+</article>
+{% endblock %}

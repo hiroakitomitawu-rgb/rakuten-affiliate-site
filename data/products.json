@@ -1,0 +1,30 @@
+{
+  "generated_at": "2024-01-01T12:00:00",
+  "count": 2,
+  "products": [
+    {
+      "item_name": "デロンギ コンパクト全自動コーヒーメーカー マグニフィカスタート ECAM22020B",
+      "price": 59800,
+      "item_url": "https://item.rakuten.co.jp/delonghi/ecam22020b/",
+      "image_url": "https://thumbnail.image.rakuten.co.jp/@0_mall/delonghi/cabinet/img/ecam22020b_main.jpg",
+      "review_average": 4.52,
+      "review_count": 1248,
+      "shop_name": "デロンギ公式ショップ",
+      "caption": "豆から挽きたての本格エスプレッソが楽しめるコンパクト全自動コーヒーメーカー。重量3.8kg、容量1.8L。",
+      "point_rate": 2,
+      "fetched_at": "2024-01-01T12:00:01"
+    },
+    {
+      "item_name": "マイプロテイン Impact ホエイプロテイン チョコレートブラウニー味 1kg",
+      "price": 3490,
+      "item_url": "https://item.rakuten.co.jp/myprotein/mp001/",
+      "image_url": "https://thumbnail.image.rakuten.co.jp/@0_mall/myprotein/cabinet/img/impact_whey_choco.jpg",
+      "review_average": 4.31,
+      "review_count": 5621,
+      "shop_name": "Myprotein Japan公式",
+      "caption": "1食あたりタンパク質21g配合。内容量1kg、約40食分。人工甘味料不使用のナチュラル製法。",
+      "point_rate": 5,
+      "fetched_at": "2024-01-01T12:00:02"
+    }
+  ]
+}
